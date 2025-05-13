@@ -9,7 +9,7 @@ import SwiftUI
 import AVFoundation
 
 final class VideoCaptureViewModel: ObservableObject {
-    @Published var isRecording: Bool = false
+    @Published var isRecording: Bool = false {}
     @Published var image: UIImage?
     let session = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
@@ -59,14 +59,25 @@ final class VideoCaptureViewModel: ObservableObject {
     }
 
     func captureFrame() {
-        videoOutputHandler.completion = { [self] image in
-            Task {
-                await MainActor.run {
-                    self.image = image
+        if isRecording {
+            isRecording = false
+            videoOutputHandler.completion = { [self] image in
+                Task {
+                    await MainActor.run {
+                        self.image = image
+                    }
                 }
             }
+            background { [weak self] in
+                self?.session.stopRunning()
+            }
+        } else {
+            isRecording = true
+            image = nil
+            background { [weak self] in
+                self?.session.startRunning()
+            }
         }
-        recordButtonTapped()
     }
 
     func recordButtonTapped() {
@@ -94,11 +105,31 @@ class VideoOutputHandler: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate
     var completion: ((UIImage) -> Void)?
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let ciImage = CIImage(cvImageBuffer: imageBuffer)
+        guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
+
+        if connection.isVideoRotationAngleSupported(rotationAngle) {
+            connection.videoRotationAngle = rotationAngle
+        }
+    
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
         let context = CIContext()
+        
         if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
             completion?(UIImage(cgImage: cgImage))
+        }
+    }
+
+    var rotationAngle: CGFloat {
+        let orientation = UIDevice.current.orientation
+        switch orientation {
+        case UIDeviceOrientation.portraitUpsideDown:
+            return 270
+        case UIDeviceOrientation.landscapeLeft:
+            return 0
+        case UIDeviceOrientation.landscapeRight:
+            return 180
+        default:
+            return  90
         }
     }
 }

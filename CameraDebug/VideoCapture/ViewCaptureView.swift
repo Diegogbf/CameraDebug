@@ -11,43 +11,58 @@ struct ViewCaptureView: View {
     @StateObject var viewModel = VideoCaptureViewModel()
 
     var body: some View {
-        VStack {
-            ZStack(alignment: .bottom) {
+        GeometryReader { geometry in
+            VStack {
                 ZStack {
                     if let image = viewModel.image {
                         Image(uiImage: image)
                             .resizable()
-                            .scaledToFit()
+                            .scaledToFill()
                     } else {
                         CameraPreviewView(session: viewModel.session)
                     }
                 }
+                .frame(
+                    width: geometry.size.width * 0.8,
+                    height: geometry.size.height * 0.8
+                )
                 .background(Color.gray)
                 .cornerRadius(10)
-                .padding(35)
-                TakePictureButton(isRecording: viewModel.isRecording) {
-                    viewModel.recordButtonTapped()
+                .overlay(alignment: .bottom) {
+                    HStack(spacing: 20) {
+                        Spacer()
+                        TakePictureButton(isRecording: viewModel.isRecording) {
+                            viewModel.recordButtonTapped()
+                        }
+                        FlipCameraButton {
+                            viewModel.flipCamera()
+                        }
+                        Spacer()
+                    }
+                    .padding(50)
                 }
-                .offset(y: -50)
-                FlipCameraButton {
-                    viewModel.flipCamera()
+                HStack(spacing: 20) {
+                    Button(viewModel.isRecording ? "Capture" : "Reset") {
+                        viewModel.captureFrame()
+                    }
+                    .buttonStyle(CustomButton())
+                    .disabled(viewModel.image == nil && !viewModel.isRecording)
+                    Button("Continue") {
+                        
+                    }
+                    .buttonStyle(CustomButton())
+                    .disabled(viewModel.image == nil)
                 }
-                .offset(x: 120, y: -60)
+                .padding(.top)
+            }.onAppear {
+                viewModel.configure()
             }
-            HStack(alignment: .center) {
-                Button("Capture Frame") {
-                    viewModel.captureFrame()
-                }
-                .buttonStyle(CustomButton())
-                .disabled(!viewModel.isRecording)
-                Button("Continue") {
-                    
-                }
-                .buttonStyle(CustomButton())
-                .disabled(viewModel.image == nil)
-            }
-        }.onAppear {
-            viewModel.configure()
+            .padding(
+                .vertical, geometry.size.height * 0.05
+            )
+            .padding(
+                .horizontal, geometry.size.width * 0.1
+            )
         }
     }
 }

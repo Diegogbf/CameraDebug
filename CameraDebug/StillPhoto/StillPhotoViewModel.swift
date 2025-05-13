@@ -24,6 +24,8 @@ final class StillPhotoViewModel: ObservableObject {
             session.addOutput(output)
         }
 
+        output.maxPhotoQualityPrioritization = .quality
+        session.sessionPreset = AVCaptureSession.Preset.photo
         session.commitConfiguration()
         background { [weak self] in
             self?.session.startRunning()
