@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ViewCaptureView: View {
+struct VideoCaptureView: View {
     @StateObject var viewModel = VideoCaptureViewModel()
 
     var body: some View {
@@ -23,7 +23,7 @@ struct ViewCaptureView: View {
                     }
                 }
                 .frame(
-                    width: geometry.size.width * 0.8,
+                    width: geometry.size.width * 0.9,
                     height: geometry.size.height * 0.8
                 )
                 .background(Color.gray)
@@ -47,11 +47,12 @@ struct ViewCaptureView: View {
                     }
                     .buttonStyle(CustomButton())
                     .disabled(viewModel.image == nil && !viewModel.isRecording)
-                    Button("Continue") {
-                        
+                    NavigationLink {
+                        VideoCaptureView()
+                    } label: {
+                        Text("Continue")
+                            .disabled(viewModel.image == nil)
                     }
-                    .buttonStyle(CustomButton())
-                    .disabled(viewModel.image == nil)
                 }
                 .padding(.top)
             }.onAppear {
@@ -61,12 +62,12 @@ struct ViewCaptureView: View {
                 .vertical, geometry.size.height * 0.05
             )
             .padding(
-                .horizontal, geometry.size.width * 0.1
+                .horizontal, geometry.size.width * 0.05
             )
         }
     }
 }
 
 #Preview {
-    ViewCaptureView()
+    VideoCaptureView()
 }

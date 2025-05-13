@@ -11,7 +11,9 @@ import SwiftUI
 struct CameraDebugApp: App {
     var body: some Scene {
         WindowGroup {
-            ViewCaptureView()
+            NavigationStack {
+                StillPhotoView()
+            }
         }
     }
 }

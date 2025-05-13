@@ -9,7 +9,7 @@ import SwiftUI
 import AVFoundation
 
 final class VideoCaptureViewModel: ObservableObject {
-    @Published var isRecording: Bool = false {}
+    @Published var isRecording: Bool = false
     @Published var image: UIImage?
     let session = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
@@ -27,7 +27,6 @@ final class VideoCaptureViewModel: ObservableObject {
                 queue: .global(qos: .userInitiated)
             )
         }
-        videoOutput.connections.first?.videoRotationAngle = 90
         session.commitConfiguration()
         background { [weak self] in
             self?.session.startRunning()

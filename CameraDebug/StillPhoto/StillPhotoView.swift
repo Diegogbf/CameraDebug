@@ -9,7 +9,7 @@ import SwiftUI
 
 struct StillPhotoView: View {
     @StateObject var viewModel = StillPhotoViewModel()
-
+    
     var body: some View {
         VStack {
             ZStack(alignment: .bottom) {
@@ -41,11 +41,12 @@ struct StillPhotoView: View {
                     }
                     .buttonStyle(CustomButton())
                 }
-                Button("Continue") {
-                    
+                NavigationLink {
+                    VideoCaptureView()
+                } label: {
+                    Text("Continue")
+                        .disabled(viewModel.image == nil)
                 }
-                .buttonStyle(CustomButton())
-                .disabled(viewModel.image == nil)
             }
         }.onAppear {
             viewModel.configure()
