@@ -1,14 +1,14 @@
 //
-//  ContentView.swift
+//  ViewCaptureView.swift
 //  CameraDebug
 //
-//  Created by Diego Gomes Basilio Fernandes on 5/11/25.
+//  Created by Diego Gomes Basilio Fernandes on 5/12/25.
 //
 
 import SwiftUI
 
-struct StillPhotoView: View {
-    @StateObject var viewModel = StillPhotoViewModel()
+struct ViewCaptureView: View {
+    @StateObject var viewModel = VideoCaptureViewModel()
 
     var body: some View {
         VStack {
@@ -25,8 +25,8 @@ struct StillPhotoView: View {
                 .background(Color.gray)
                 .cornerRadius(10)
                 .padding(35)
-                TakePictureButton(isRecording: false) {
-                    viewModel.capturePhoto()
+                TakePictureButton(isRecording: viewModel.isRecording) {
+                    viewModel.recordButtonTapped()
                 }
                 .offset(y: -50)
                 FlipCameraButton {
@@ -35,12 +35,11 @@ struct StillPhotoView: View {
                 .offset(x: 120, y: -60)
             }
             HStack(alignment: .center) {
-                if viewModel.image != nil {
-                    Button("Retake Photo") {
-                        viewModel.reset()
-                    }
-                    .buttonStyle(CustomButton())
+                Button("Capture Frame") {
+                    viewModel.captureFrame()
                 }
+                .buttonStyle(CustomButton())
+                .disabled(!viewModel.isRecording)
                 Button("Continue") {
                     
                 }
@@ -54,5 +53,5 @@ struct StillPhotoView: View {
 }
 
 #Preview {
-    StillPhotoView()
+    ViewCaptureView()
 }

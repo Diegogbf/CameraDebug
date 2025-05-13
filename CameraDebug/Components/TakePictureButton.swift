@@ -8,16 +8,17 @@
 import SwiftUI
 
 struct TakePictureButton: View {
-    var action: () -> Void
+    let isRecording: Bool
+    let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             ZStack {
                 Circle()
-                    .fill(Color.white)
+                    .fill(isRecording ? .red : .white)
                     .frame(width: 80, height: 80)
                 Circle()
-                    .stroke(Color.gray.opacity(0.6), lineWidth: 5)
+                    .stroke(isRecording ? .white : Color.gray.opacity(0.6), lineWidth: 5)
                     .frame(width: 70, height: 70)
             }
         }

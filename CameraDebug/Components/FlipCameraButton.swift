@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FlipCameraButton: View {
-    var action: () -> Void
+    let action: () -> Void
 
     var body: some View {
         Button(action: action) {
