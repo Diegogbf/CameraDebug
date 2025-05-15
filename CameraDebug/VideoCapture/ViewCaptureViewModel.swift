@@ -11,11 +11,17 @@ import AVFoundation
 final class VideoCaptureViewModel: ObservableObject {
     @Published var isRecording: Bool = false
     @Published var image: UIImage?
+    @Published var stillImage: UIImage?
     let session = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
     private var deviceInput: AVCaptureDeviceInput?
     private var cameraPosition: AVCaptureDevice.Position = .back
     private let videoOutputHandler = VideoOutputHandler()
+
+    init(stillImage: UIImage? = nil, videoFrame: UIImage? = nil) {
+        self.stillImage = stillImage
+        self.image = videoFrame
+    }
 
     func configure() {
         createInput(for: cameraPosition)

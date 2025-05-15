@@ -10,39 +10,59 @@ import SwiftUI
 struct ResultsView: View {
     @State private var currentZoom = 0.0
     @State private var lastPosition = 1.0
-    let stillImage: UIImage
-    let videoFrameImage: UIImage
+    @ObservedObject var viewModel: VideoCaptureViewModel
     
     var body: some View {
-        HStack(spacing: 24) {
-            Image(systemName: "pencil")
-                .resizable()
-                .scaledToFit()
-                .background(Color.gray)
-                .cornerRadius(10)
-            Image(systemName: "pencil")
-                .resizable()
-                .scaledToFit()
-                .background(Color.gray)
-                .cornerRadius(10)
+        GeometryReader { geometry in
+            HStack(spacing: 24) {
+                if let image = viewModel.stillImage {
+                    ResultImageView(image: image)
+                }
+                
+                if let image = viewModel.image {
+                    ResultImageView(image: image)
+                }
+            }
+            .scaleEffect(currentZoom + lastPosition)
+            .gesture(
+                MagnifyGesture()
+                    .onChanged { value in
+                        currentZoom = value.magnification - 1
+                    }
+                    .onEnded { value in
+                        lastPosition += currentZoom
+                        currentZoom = 0
+                    }
+            )
+            .frame(height: geometry.size.height * 0.7)
+            .padding(
+                .vertical, geometry.size.width * 0.2
+            )
+            .padding(
+                .horizontal, 20
+            )
         }
-        .scaleEffect(currentZoom + lastPosition)
-        .gesture(
-            MagnifyGesture()
-                .onChanged { value in
-                    currentZoom = value.magnification - 1
-                }
-                .onEnded { value in
-                    lastPosition += currentZoom
-                    currentZoom = 0
-                }
-        )
+    }
+}
+
+struct ResultImageView: View {
+    let image: UIImage
+    
+    var body: some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFit()
+            .cornerRadius(10)
     }
 }
 
 #Preview {
     ResultsView(
-        stillImage: .init(systemName: "pencil")!,
-        videoFrameImage: .init(systemName: "pencil")!
+        viewModel: VideoCaptureViewModel(
+            stillImage: UIImage(
+                systemName: "star"
+            ),
+            videoFrame: UIImage(systemName: "pencil")
+        )
     )
 }

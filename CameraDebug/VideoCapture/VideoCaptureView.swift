@@ -48,7 +48,7 @@ struct VideoCaptureView: View {
                     .buttonStyle(CustomButton())
                     .disabled(viewModel.image == nil && !viewModel.isRecording)
                     NavigationLink {
-                        VideoCaptureView()
+                        ResultsView(viewModel: viewModel)
                     } label: {
                         Text("Continue")
                             .disabled(viewModel.image == nil)
