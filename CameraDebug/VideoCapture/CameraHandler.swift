@@ -14,9 +14,17 @@ final class CameraHandler: NSObject {
     private let videoOutput = AVCaptureVideoDataOutput()
     private let photoOutput = AVCapturePhotoOutput()
     private var deviceInput: AVCaptureDeviceInput?
-    var shouldNotifyVideoFrame = false
     var image: UIImage?
     private var cameraPosition: AVCaptureDevice.Position = .back
+    private var addToCameraStream: ((UIImage) -> Void)?
+
+    lazy var cameraStream: AsyncStream<UIImage> = AsyncStream { continuation in
+        addToCameraStream = { image in
+            continuation.yield(image)
+        }
+    }
+
+    private var frameCaptureCompletion: ((UIImage) -> Void)?
 
     func configure() {
         createInput(for: cameraPosition)
@@ -94,6 +102,15 @@ final class CameraHandler: NSObject {
         }
     }
 
+    func captureFrame() async throws -> UIImage {
+        return await withCheckedContinuation { continuation in
+            frameCaptureCompletion = { [weak self] image in
+                self?.frameCaptureCompletion = nil
+                continuation.resume(returning: image)
+            }
+        }
+    }
+
     var rotationAngle: CGFloat {
         let orientation = UIDevice.current.orientation
         switch orientation {
@@ -121,9 +138,7 @@ extension CameraHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
         let context = CIContext()
         
         if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
-            if shouldNotifyVideoFrame {
-                image = UIImage(cgImage: cgImage)
-            }
+            frameCaptureCompletion?(UIImage(cgImage: cgImage))
         }
     }
 }
@@ -136,9 +151,6 @@ extension CameraHandler: AVCapturePhotoCaptureDelegate {
     ) {
         guard let data = photo.fileDataRepresentation(),
               let image = UIImage(data: data) else { return }
-        self.image = image
-        Task.detached { [weak self] in
-            self?.session.stopRunning()
-        }
+        addToCameraStream?(image)
     }
 }

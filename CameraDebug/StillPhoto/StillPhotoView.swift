@@ -31,13 +31,14 @@ struct StillPhotoView: View {
                     NavigationLink {
                         VideoCaptureView()
                     } label: {
-                        Button("Continue") {}
-                        .buttonStyle(CustomButton())
+                        Text("Continue")
                     }.disabled(viewModel.image == nil)
                 }
                 .padding(.top)
             }.onAppear {
                 viewModel.configure()
+            }.onDisappear {
+                viewModel.stop()
             }
             .padding(
                 .vertical, geometry.size.height * 0.05

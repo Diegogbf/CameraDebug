@@ -5,6 +5,7 @@
 //  Created by Diego Gomes Basilio Fernandes on 5/12/25.
 //
 
+import AVFoundation
 import SwiftUI
 
 final class VideoCaptureViewModel: ObservableObject {
@@ -22,8 +23,18 @@ final class VideoCaptureViewModel: ObservableObject {
     }
 
     func captureFrame() {
-        cameraHandler.shouldNotifyVideoFrame = true
-        cameraHandler.shouldNotifyVideoFrame = false
+        Task {
+            do {
+                let image = try await cameraHandler.captureFrame()
+                await MainActor.run {
+                    self.image = image
+                }
+            } catch { }
+        }
+    }
+
+    func stop() {
+        cameraHandler.stop()
     }
 
     func recordButtonTapped() {

@@ -14,8 +14,26 @@ final class StillPhotoViewModel: ObservableObject {
     @Published var image: UIImage?
     let cameraHandler = CameraHandler()
 
+    init() {
+        Task {
+            await handleCameraStream()
+        }
+    }
+
+    func handleCameraStream() async {
+        for await imageData in cameraHandler.cameraStream {
+            Task { @MainActor in
+                image = imageData
+            }
+        }
+    }
+
     func configure() {
         cameraHandler.configure()
+    }
+
+    func stop() {
+        cameraHandler.stop()
     }
 
     func flipCamera() {
@@ -24,11 +42,5 @@ final class StillPhotoViewModel: ObservableObject {
 
     func captureFrame() {
         cameraHandler.capturePhoto()
-        cameraHandler.stop()
-    }
-
-    func resetCapture() {
-        image = nil
-        cameraHandler.start()
     }
 }

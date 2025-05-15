@@ -22,7 +22,7 @@ struct CameraView: View {
         .background(Color.gray)
         .cornerRadius(10)
         .overlay(alignment: .bottom) {
-            HStack(spacing: 50) {
+            HStack(spacing: 40) {
                 Spacer()
                 ThumbnailView(image: image)
                 TakePictureButton(

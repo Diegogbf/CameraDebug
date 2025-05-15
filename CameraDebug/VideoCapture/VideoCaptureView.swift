@@ -36,13 +36,15 @@ struct VideoCaptureView: View {
                     NavigationLink {
                         ResultsView(viewModel: viewModel)
                     } label: {
-                        Button("Continue") {}
-                        .buttonStyle(CustomButton())
+                        Text("Continue")
                     }.disabled(viewModel.image == nil)
                 }
                 .padding(.top)
             }.onAppear {
                 viewModel.configure()
+            }
+            .onDisappear {
+                viewModel.stop()
             }
             .padding(
                 .horizontal, geometry.size.width * 0.1

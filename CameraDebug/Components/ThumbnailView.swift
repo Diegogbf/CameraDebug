@@ -12,7 +12,7 @@ struct ThumbnailView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.3)
+            Color.black.opacity(0.6)
             if let image = image {
                 Image(uiImage: image)
                     .resizable()
