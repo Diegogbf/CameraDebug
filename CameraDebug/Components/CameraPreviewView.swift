@@ -11,22 +11,25 @@ import AVFoundation
 struct CameraPreviewView: UIViewRepresentable {
     class VideoPreviewView: UIView {
         var videoPreviewLayer: AVCaptureVideoPreviewLayer {
-            layer as! AVCaptureVideoPreviewLayer
+            guard let layer = layer as? AVCaptureVideoPreviewLayer else {
+                fatalError("layer is not AVCaptureVideoPreviewLayer")
+            }
+            return layer
         }
         
         override class var layerClass: AnyClass {
             AVCaptureVideoPreviewLayer.self
         }
     }
-    
-    let session: AVCaptureSession
-    
+
+    let session: SessionCaptureHolder
+
     func makeUIView(context: Context) -> VideoPreviewView {
         let view = VideoPreviewView()
-        view.videoPreviewLayer.session = session
+        session.setupPreview(view.videoPreviewLayer)
         view.videoPreviewLayer.videoGravity = .resizeAspectFill
         return view
     }
-    
+
     func updateUIView(_ uiView: VideoPreviewView, context: Context) {}
 }

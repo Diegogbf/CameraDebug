@@ -5,16 +5,14 @@
 //  Created by Diego Gomes Basilio Fernandes on 5/14/25.
 //
 
-
 import AVFoundation
 import UIKit
 
 final class CameraHandler: NSObject {
-    let session = AVCaptureSession()
+    let session = SessionCaptureHolder()
     private let videoOutput = AVCaptureVideoDataOutput()
     private let photoOutput = AVCapturePhotoOutput()
     private var deviceInput: AVCaptureDeviceInput?
-    var image: UIImage?
     private var cameraPosition: AVCaptureDevice.Position = .back
     private var addToCameraStream: ((UIImage) -> Void)?
 
@@ -28,59 +26,57 @@ final class CameraHandler: NSObject {
 
     func configure() async throws {
         guard try await checkAuthorization() else { return }
-        createInput(for: cameraPosition)
+        await createInput(for: cameraPosition)
 
         photoOutput.maxPhotoQualityPrioritization = .quality
-        session.sessionPreset = AVCaptureSession.Preset.photo
+        videoOutput.setSampleBufferDelegate(
+            self,
+            queue: .global(qos: .userInitiated)
+        )
 
-        if session.canAddOutput(photoOutput) {
-            session.addOutput(photoOutput)
+        for output in [photoOutput, videoOutput] {
+            await session.addOutput(output)
         }
-            
-        if session.canAddOutput(videoOutput) {
-            session.addOutput(videoOutput)
-            videoOutput.setSampleBufferDelegate(
-                self,
-                queue: .global(qos: .userInitiated)
-            )
-        }
-        session.commitConfiguration()
+
+        await session.commitConfiguration()
         start()
     }
 
     func start() {
         Task.detached { [weak self] in
-            self?.session.startRunning()
+            await self?.session.start()
         }
     }
 
     func stop() {
         Task.detached { [weak self] in
-            self?.session.stopRunning()
+            await self?.session.stop()
         }
     }
 
-    func createInput(for position: AVCaptureDevice.Position) {
-        session.beginConfiguration()
+    func createInput(for position: AVCaptureDevice.Position) async {
+        await session.beginConfiguration()
         if let deviceInput {
-            session.removeInput(deviceInput)
+            await session.removeInput(deviceInput)
         }
         
-        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position),
-           let input = try? AVCaptureDeviceInput(device: device) {
-            if session.canAddInput(input) {
-                session.addInput(input)
-                deviceInput = input
-            }
+        if let device = AVCaptureDevice.default(
+            .builtInWideAngleCamera,
+            for: .video,
+            position: position
+        ),
+        let input = try? AVCaptureDeviceInput(device: device) {
+            await session.addInput(input)
+            deviceInput = input
         }
     }
     
     func flipCamera() {
         let newPosition: AVCaptureDevice.Position = cameraPosition == .back ? .front : .back
         cameraPosition = newPosition
-        Task.detached { [weak self, ] in
-            self?.createInput(for: newPosition)
-            self?.session.commitConfiguration()
+        Task.detached { [weak self] in
+            await self?.createInput(for: newPosition)
+            await self?.session.commitConfiguration()
         }
     }
 

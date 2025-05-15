@@ -11,7 +11,7 @@ import SwiftUI
 struct CameraView: View {
     @Binding var image: UIImage?
     @Binding var isRecording: Bool
-    let session: AVCaptureSession
+    let session: SessionCaptureHolder
     let mainButtonAction: () -> Void
     let flipButtonAction: () -> Void
 

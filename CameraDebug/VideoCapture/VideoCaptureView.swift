@@ -28,7 +28,7 @@ struct VideoCaptureView: View {
                     height: geometry.size.height * 0.8
                 )
                 HStack(spacing: 20) {
-                    Button(viewModel.isRecording ? "Capture" : "Reset") {
+                    Button("Capture") {
                         viewModel.captureFrame()
                     }
                     .buttonStyle(CustomButton())
