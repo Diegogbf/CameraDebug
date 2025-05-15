@@ -1,3 +1,13 @@
+//
+//  ZoomableScrollView.swift
+//  CameraDebug
+//
+//  Created by Diego Gomes Basilio Fernandes on 5/15/25.
+//
+
+import SwiftUI
+import UIKit
+
 struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     private var content: Content
     

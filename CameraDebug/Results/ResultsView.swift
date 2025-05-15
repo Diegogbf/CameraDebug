@@ -12,24 +12,36 @@ struct ResultsView: View {
     @State private var lastPosition = 1.0
     var stillPhotoSample: PhotoSample?
     var videoFrameSample: PhotoSample?
+    var usingFullSwiftUI = false
     
     var body: some View {
         GeometryReader { geometry in
-            HStack(spacing: 24) {
-                createSampleView(stillPhotoSample)
-                createSampleView(videoFrameSample)
+            VStack {
+                if usingFullSwiftUI {
+                    HStack(spacing: 24) {
+                        createSampleView(stillPhotoSample)
+                        createSampleView(videoFrameSample)
+                    }
+                    .scaleEffect(currentZoom + lastPosition)
+                    .gesture(
+                        MagnifyGesture()
+                            .onChanged { value in
+                                currentZoom = value.magnification - 1
+                            }
+                            .onEnded { value in
+                                lastPosition += currentZoom
+                                currentZoom = 0
+                            }
+                    )
+                } else {
+                    ZoomableScrollView {
+                        HStack(spacing: 24) {
+                            createSampleView(stillPhotoSample)
+                            createSampleView(videoFrameSample)
+                        }
+                    }
+                }
             }
-            .scaleEffect(currentZoom + lastPosition)
-            .gesture(
-                MagnifyGesture()
-                    .onChanged { value in
-                        currentZoom = value.magnification - 1
-                    }
-                    .onEnded { value in
-                        lastPosition += currentZoom
-                        currentZoom = 0
-                    }
-            )
             .frame(height: geometry.size.height * 0.7)
             .padding(
                 .vertical, geometry.size.width * 0.2
