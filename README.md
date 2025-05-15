@@ -41,24 +41,6 @@ The project follows a modular structure with clear responsibility layers:
   - `ZoomableScrollView`: Uses `UIScrollView` to support zoom in SwiftUI
   - `CameraPreviewView`: Wraps `AVCaptureVideoPreviewLayer` in a SwiftUI-compatible `UIViewRepresentable`
 
-## 📂 Project Structure
-
-SwiftMediaCaptureApp/
-├── CameraLayer/
-│ ├── CameraManager.swift
-│ ├── PhotoCaptureHandler.swift
-│ └── VideoCaptureHandler.swift
-├── SessionAccessLayer/
-│ └── SessionController.swift
-├── Views/
-│ ├── StillPhotoViewController.swift
-│ ├── VideoCaptureViewController.swift
-│ └── ResultsViewController.swift
-├── UIKitBridge/
-│ ├── ZoomableScrollView.swift
-│ └── CameraPreviewView.swift
-
-
 ## 🛠 Requirements
 
 - iOS 18.4+
