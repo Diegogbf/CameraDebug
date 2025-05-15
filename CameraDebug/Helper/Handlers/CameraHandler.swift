@@ -9,6 +9,8 @@ import AVFoundation
 import UIKit
 
 final class CameraHandler: NSObject {
+    // MARK: - Internal Properties
+
     private let videoOutput = AVCaptureVideoDataOutput()
     private let photoOutput = AVCapturePhotoOutput()
     private var deviceInput: AVCaptureDeviceInput?
@@ -16,12 +18,16 @@ final class CameraHandler: NSObject {
     private var addToCameraStream: ((UIImage, AVCaptureDevice.Position) -> Void)?
     private var frameCaptureCompletion: ((UIImage, AVCaptureDevice.Position) -> Void)?
 
+    // MARK: - External Properties
+
     let session = SessionCaptureHandler()
     lazy var cameraStream: AsyncStream<(image: UIImage, position: AVCaptureDevice.Position)> = AsyncStream { continuation in
         addToCameraStream = { image, position in
             continuation.yield((image: image, position: position))
         }
     }
+
+    // MARK: - External methods
 
     func configure() async throws {
         Task.detached { [weak self] in
@@ -51,23 +57,6 @@ final class CameraHandler: NSObject {
 
     func stop() async {
         await session.stop()
-    }
-
-    private func createInput(for position: AVCaptureDevice.Position) async {
-        await session.beginConfiguration()
-        if let deviceInput {
-            await session.removeInput(deviceInput)
-        }
-        
-        if let device = AVCaptureDevice.default(
-            .builtInWideAngleCamera,
-            for: .video,
-            position: position
-        ),
-        let input = try? AVCaptureDeviceInput(device: device) {
-            await session.addInput(input)
-            deviceInput = input
-        }
     }
     
     func flipCamera() async {
@@ -108,6 +97,25 @@ final class CameraHandler: NSObject {
             }
         }
     }
+    
+    // MARK: - Setup methods
+
+    private func createInput(for position: AVCaptureDevice.Position) async {
+        await session.beginConfiguration()
+        if let deviceInput {
+            await session.removeInput(deviceInput)
+        }
+        
+        if let device = AVCaptureDevice.default(
+            .builtInWideAngleCamera,
+            for: .video,
+            position: position
+        ),
+        let input = try? AVCaptureDeviceInput(device: device) {
+            await session.addInput(input)
+            deviceInput = input
+        }
+    }
 
     private var rotationAngle: CGFloat {
         let orientation = UIDevice.current.orientation
@@ -142,6 +150,8 @@ final class CameraHandler: NSObject {
     }
 }
 
+// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+
 extension CameraHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
@@ -158,6 +168,8 @@ extension CameraHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 }
+
+// MARK: - AVCapturePhotoCaptureDelegate
 
 extension CameraHandler: AVCapturePhotoCaptureDelegate {
     func photoOutput(
