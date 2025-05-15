@@ -11,11 +11,24 @@ import SwiftUI
 final class VideoCaptureViewModel: ObservableObject {
     @Published var isRecording: Bool = false
     @Published var image: UIImage?
+    @Published var displayError: Bool = false
+    var contextError: ContextError? {
+        didSet {
+            displayError = contextError != nil
+        }
+    }
+
     let cameraHandler = CameraHandler()
 
-    func configure() {
-        cameraHandler.configure()
-        cameraHandler.start()
+    @MainActor
+    func configure() async {
+        do {
+            try await cameraHandler.configure()
+        } catch CameraHandler.CameraError.accessDenied {
+            contextError = .cameraDenied
+        } catch {
+            contextError = .unexpected
+        }
     }
 
     func flipCamera() {

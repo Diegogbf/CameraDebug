@@ -35,8 +35,25 @@ struct StillPhotoView: View {
                     }.disabled(viewModel.image == nil)
                 }
                 .padding(.top)
-            }.onAppear {
-                viewModel.configure()
+            }.task {
+                await viewModel.configure()
+            }.alert(
+                isPresented: $viewModel.displayError,
+                error: viewModel.contextError
+            ) { error in
+                Button("Ok") {
+                    switch error {
+                    case .cameraDenied:
+                        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+                            return
+                        }
+                        UIApplication.shared.open(url)
+                    case .unexpected:
+                        break
+                    }
+                }
+            } message: { error in
+                Text(error.message)
             }.onDisappear {
                 viewModel.stop()
             }

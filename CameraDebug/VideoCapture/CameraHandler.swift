@@ -26,7 +26,8 @@ final class CameraHandler: NSObject {
 
     private var frameCaptureCompletion: ((UIImage) -> Void)?
 
-    func configure() {
+    func configure() async throws {
+        guard try await checkAuthorization() else { return }
         createInput(for: cameraPosition)
 
         photoOutput.maxPhotoQualityPrioritization = .quality
@@ -122,6 +123,26 @@ final class CameraHandler: NSObject {
             return 180
         default:
             return  90
+        }
+    }
+    
+    enum CameraError: Error {
+        case accessDenied
+    }
+
+    private func checkAuthorization() async throws -> Bool {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            return true
+        case .notDetermined:
+            //                sessionQueue.suspend()
+            let status = await AVCaptureDevice.requestAccess(for: .video)
+            //                sessionQueue.resume()
+            return status
+        case .denied:
+            throw CameraError.accessDenied
+        default:
+            return false
         }
     }
 }
