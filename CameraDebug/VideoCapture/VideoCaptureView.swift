@@ -24,7 +24,7 @@ struct VideoCaptureView: View {
                     viewModel.flipCamera()
                 }
                 .frame(
-                    width: geometry.size.width * 0.9,
+                    width: geometry.size.width * 0.8,
                     height: geometry.size.height * 0.8
                 )
                 HStack(spacing: 20) {
@@ -36,54 +36,20 @@ struct VideoCaptureView: View {
                     NavigationLink {
                         ResultsView(viewModel: viewModel)
                     } label: {
-                        Text("Continue")
-                            .disabled(viewModel.image == nil)
-                    }
+                        Button("Continue") {}
+                        .buttonStyle(CustomButton())
+                    }.disabled(viewModel.image == nil)
                 }
                 .padding(.top)
             }.onAppear {
                 viewModel.configure()
             }
             .padding(
-                .vertical, geometry.size.height * 0.05
+                .horizontal, geometry.size.width * 0.1
             )
             .padding(
-                .horizontal, geometry.size.width * 0.05
+                .vertical, geometry.size.height * 0.05
             )
-        }
-    }
-}
-
-struct CameraView: View {
-    @Binding var image: UIImage?
-    @Binding var isRecording: Bool
-    let session: AVCaptureSession
-    let mainButtonAction: () -> Void
-    let flipButtonAction: () -> Void
-
-    var body: some View {
-        ZStack {
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                CameraPreviewView(session: session)
-            }
-        }
-        .background(Color.gray)
-        .cornerRadius(10)
-        .overlay(alignment: .bottom) {
-            HStack(spacing: 20) {
-                Spacer()
-                TakePictureButton(
-                    isRecording: isRecording,
-                    action: mainButtonAction
-                )
-                FlipCameraButton(action: flipButtonAction)
-                Spacer()
-            }
-            .padding(50)
         }
     }
 }

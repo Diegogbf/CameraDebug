@@ -24,25 +24,16 @@ struct StillPhotoView: View {
                     viewModel.flipCamera()
                 }
                 .frame(
-                    width: geometry.size.width * 0.9,
+                    width: geometry.size.width * 0.8,
                     height: geometry.size.height * 0.8
                 )
                 HStack(alignment: .center) {
-                    if viewModel.image != nil {
-                        Button("Retake Photo") {
-                            viewModel.resetCapture()
-                        }
-                        .buttonStyle(CustomButton())
-                    }
                     NavigationLink {
                         VideoCaptureView()
                     } label: {
-                        Button("Continue") {
-                            viewModel.resetCapture()
-                        }
+                        Button("Continue") {}
                         .buttonStyle(CustomButton())
-                        .disabled(viewModel.image == nil)
-                    }
+                    }.disabled(viewModel.image == nil)
                 }
                 .padding(.top)
             }.onAppear {
@@ -52,7 +43,7 @@ struct StillPhotoView: View {
                 .vertical, geometry.size.height * 0.05
             )
             .padding(
-                .horizontal, geometry.size.width * 0.05
+                .horizontal, geometry.size.width * 0.1
             )
         }
     }
