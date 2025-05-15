@@ -15,7 +15,7 @@ struct ResultsView: View {
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 24) {
-                if let image = viewModel.stillImage {
+                if let image = viewModel.image {
                     ResultImageView(image: image)
                 }
                 
@@ -58,11 +58,6 @@ struct ResultImageView: View {
 
 #Preview {
     ResultsView(
-        viewModel: VideoCaptureViewModel(
-            stillImage: UIImage(
-                systemName: "star"
-            ),
-            videoFrame: UIImage(systemName: "pencil")
-        )
+        viewModel: VideoCaptureViewModel()
     )
 }

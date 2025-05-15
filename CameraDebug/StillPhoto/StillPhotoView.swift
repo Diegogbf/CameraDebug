@@ -11,45 +11,49 @@ struct StillPhotoView: View {
     @StateObject var viewModel = StillPhotoViewModel()
     
     var body: some View {
-        VStack {
-            ZStack(alignment: .bottom) {
-                ZStack {
-                    if let image = viewModel.image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                    } else {
-                        CameraPreviewView(session: viewModel.session)
-                    }
-                }
-                .background(Color.gray)
-                .cornerRadius(10)
-                .padding(35)
-                TakePictureButton(isRecording: false) {
-                    viewModel.capturePhoto()
-                }
-                .offset(y: -50)
-                FlipCameraButton {
+        GeometryReader { geometry in
+            VStack {
+                CameraView(
+                    image: $viewModel.image,
+                    isRecording: $viewModel.isRecording,
+                    session: viewModel.cameraHandler.session
+                )
+                {
+                    viewModel.captureFrame()
+                } flipButtonAction: {
                     viewModel.flipCamera()
                 }
-                .offset(x: 120, y: -60)
-            }
-            HStack(alignment: .center) {
-                if viewModel.image != nil {
-                    Button("Retake Photo") {
-                        viewModel.reset()
+                .frame(
+                    width: geometry.size.width * 0.9,
+                    height: geometry.size.height * 0.8
+                )
+                HStack(alignment: .center) {
+                    if viewModel.image != nil {
+                        Button("Retake Photo") {
+                            viewModel.resetCapture()
+                        }
+                        .buttonStyle(CustomButton())
                     }
-                    .buttonStyle(CustomButton())
-                }
-                NavigationLink {
-                    VideoCaptureView()
-                } label: {
-                    Text("Continue")
+                    NavigationLink {
+                        VideoCaptureView()
+                    } label: {
+                        Button("Continue") {
+                            viewModel.resetCapture()
+                        }
+                        .buttonStyle(CustomButton())
                         .disabled(viewModel.image == nil)
+                    }
                 }
+                .padding(.top)
+            }.onAppear {
+                viewModel.configure()
             }
-        }.onAppear {
-            viewModel.configure()
+            .padding(
+                .vertical, geometry.size.height * 0.05
+            )
+            .padding(
+                .horizontal, geometry.size.width * 0.05
+            )
         }
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct VideoCaptureView: View {
     @StateObject var viewModel = VideoCaptureViewModel()
@@ -13,34 +14,19 @@ struct VideoCaptureView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack {
-                ZStack {
-                    if let image = viewModel.image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                    } else {
-                        CameraPreviewView(session: viewModel.session)
-                    }
+                CameraView(
+                    image: $viewModel.image,
+                    isRecording: $viewModel.isRecording,
+                    session: viewModel.cameraHandler.session
+                ) {
+                    viewModel.recordButtonTapped()
+                } flipButtonAction: {
+                    viewModel.flipCamera()
                 }
                 .frame(
                     width: geometry.size.width * 0.9,
                     height: geometry.size.height * 0.8
                 )
-                .background(Color.gray)
-                .cornerRadius(10)
-                .overlay(alignment: .bottom) {
-                    HStack(spacing: 20) {
-                        Spacer()
-                        TakePictureButton(isRecording: viewModel.isRecording) {
-                            viewModel.recordButtonTapped()
-                        }
-                        FlipCameraButton {
-                            viewModel.flipCamera()
-                        }
-                        Spacer()
-                    }
-                    .padding(50)
-                }
                 HStack(spacing: 20) {
                     Button(viewModel.isRecording ? "Capture" : "Reset") {
                         viewModel.captureFrame()
@@ -64,6 +50,40 @@ struct VideoCaptureView: View {
             .padding(
                 .horizontal, geometry.size.width * 0.05
             )
+        }
+    }
+}
+
+struct CameraView: View {
+    @Binding var image: UIImage?
+    @Binding var isRecording: Bool
+    let session: AVCaptureSession
+    let mainButtonAction: () -> Void
+    let flipButtonAction: () -> Void
+
+    var body: some View {
+        ZStack {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                CameraPreviewView(session: session)
+            }
+        }
+        .background(Color.gray)
+        .cornerRadius(10)
+        .overlay(alignment: .bottom) {
+            HStack(spacing: 20) {
+                Spacer()
+                TakePictureButton(
+                    isRecording: isRecording,
+                    action: mainButtonAction
+                )
+                FlipCameraButton(action: flipButtonAction)
+                Spacer()
+            }
+            .padding(50)
         }
     }
 }
