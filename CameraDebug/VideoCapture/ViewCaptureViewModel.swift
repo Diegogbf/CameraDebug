@@ -31,8 +31,8 @@ final class VideoCaptureViewModel: ObservableObject {
         }
     }
 
-    func flipCamera() {
-        cameraHandler.flipCamera()
+    func flipCamera() async {
+        await cameraHandler.flipCamera()
     }
 
     func captureFrame() {
@@ -46,8 +46,8 @@ final class VideoCaptureViewModel: ObservableObject {
         }
     }
 
-    func stop() {
-        cameraHandler.stop()
+    func stop() async {
+        await cameraHandler.stop()
     }
 
     func recordButtonTapped() {

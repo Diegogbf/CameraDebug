@@ -21,7 +21,9 @@ struct StillPhotoView: View {
                 {
                     viewModel.captureFrame()
                 } flipButtonAction: {
-                    viewModel.flipCamera()
+                    Task {
+                        await viewModel.flipCamera()
+                    }
                 }
                 .frame(
                     width: geometry.size.width * 0.8,
@@ -30,6 +32,7 @@ struct StillPhotoView: View {
                 HStack(alignment: .center) {
                     NavigationLink {
                         VideoCaptureView()
+                            .environmentObject(viewModel)
                     } label: {
                         Text("Continue")
                     }.disabled(viewModel.image == nil)
@@ -55,7 +58,9 @@ struct StillPhotoView: View {
             } message: { error in
                 Text(error.message)
             }.onDisappear {
-                viewModel.stop()
+                Task {
+                    await viewModel.stop()
+                }
             }
             .padding(
                 .vertical, geometry.size.height * 0.05

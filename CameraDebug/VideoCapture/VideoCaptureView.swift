@@ -21,7 +21,9 @@ struct VideoCaptureView: View {
                 ) {
                     viewModel.recordButtonTapped()
                 } flipButtonAction: {
-                    viewModel.flipCamera()
+                    Task {
+                        await viewModel.flipCamera()
+                    }
                 }
                 .frame(
                     width: geometry.size.width * 0.8,
@@ -34,7 +36,8 @@ struct VideoCaptureView: View {
                     .buttonStyle(CustomButton())
                     .disabled(viewModel.image == nil && !viewModel.isRecording)
                     NavigationLink {
-                        ResultsView(viewModel: viewModel)
+                        ResultsView()
+                            .environmentObject(viewModel)
                     } label: {
                         Text("Continue")
                     }.disabled(viewModel.image == nil)
@@ -44,7 +47,9 @@ struct VideoCaptureView: View {
                 await viewModel.configure()
             }
             .onDisappear {
-                viewModel.stop()
+                Task {
+                    await viewModel.stop()
+                }
             }
             .alert(
                 isPresented: $viewModel.displayError,

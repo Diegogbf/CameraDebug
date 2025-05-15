@@ -16,20 +16,28 @@ actor SessionCaptureHolder {
 
     func start() {
         guard !session.isRunning else { return }
-        session.startRunning()
+        Task.detached { [weak self] in
+            await self?.session.startRunning()
+        }
     }
 
     func stop() {
         guard session.isRunning else { return }
-        session.stopRunning()
+        Task.detached { [weak self] in
+            await self?.session.stopRunning()
+        }
     }
 
     func commitConfiguration() {
-        session.commitConfiguration()
+        Task.detached { [weak self] in
+            await self?.session.commitConfiguration()
+        }
     }
 
     func beginConfiguration() {
-        session.beginConfiguration()
+        Task.detached { [weak self] in
+            await self?.session.beginConfiguration()
+        }
     }
 
     // I know that this is leading to a warning and i think this is a very specific issue due to the fact that the preview of the camera must be configured using UIViewRepresenatable in a non async context. I didnt find any resource that helped me creating this solution avoiding the error and that is typically a situation where i would try to set up a technical discussion to the better aproach. Also, maybe in the future we'll have a native away by apple to handle this setup async

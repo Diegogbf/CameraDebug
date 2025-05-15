@@ -39,19 +39,15 @@ final class CameraHandler: NSObject {
         }
 
         await session.commitConfiguration()
-        start()
+        await start()
     }
 
-    func start() {
-        Task.detached { [weak self] in
-            await self?.session.start()
-        }
+    func start() async {
+        await session.start()
     }
 
-    func stop() {
-        Task.detached { [weak self] in
-            await self?.session.stop()
-        }
+    func stop() async {
+        await session.stop()
     }
 
     func createInput(for position: AVCaptureDevice.Position) async {
@@ -71,13 +67,11 @@ final class CameraHandler: NSObject {
         }
     }
     
-    func flipCamera() {
+    func flipCamera() async {
         let newPosition: AVCaptureDevice.Position = cameraPosition == .back ? .front : .back
         cameraPosition = newPosition
-        Task.detached { [weak self] in
-            await self?.createInput(for: newPosition)
-            await self?.session.commitConfiguration()
-        }
+        await createInput(for: newPosition)
+        await session.commitConfiguration()
     }
 
     func capturePhoto() {
@@ -131,9 +125,7 @@ final class CameraHandler: NSObject {
         case .authorized:
             return true
         case .notDetermined:
-            //                sessionQueue.suspend()
             let status = await AVCaptureDevice.requestAccess(for: .video)
-            //                sessionQueue.resume()
             return status
         case .denied:
             throw CameraError.accessDenied

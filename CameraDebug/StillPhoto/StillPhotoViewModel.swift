@@ -45,12 +45,12 @@ final class StillPhotoViewModel: ObservableObject {
         }
     }
 
-    func stop() {
-        cameraHandler.stop()
+    func stop() async {
+        await cameraHandler.stop()
     }
 
-    func flipCamera() {
-        cameraHandler.flipCamera()
+    func flipCamera() async {
+        await cameraHandler.flipCamera()
     }
 
     func captureFrame() {
