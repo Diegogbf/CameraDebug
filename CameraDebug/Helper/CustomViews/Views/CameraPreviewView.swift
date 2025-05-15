@@ -5,8 +5,8 @@
 //  Created by Diego Gomes Basilio Fernandes on 5/11/25.
 //
 
-import SwiftUI
 import AVFoundation
+import SwiftUI
 
 struct CameraPreviewView: UIViewRepresentable {
     class VideoPreviewView: UIView {
@@ -22,7 +22,7 @@ struct CameraPreviewView: UIViewRepresentable {
         }
     }
 
-    let session: SessionCaptureHolder
+    let session: SessionCaptureHandler
 
     func makeUIView(context: Context) -> VideoPreviewView {
         let view = VideoPreviewView()

@@ -9,20 +9,19 @@ import AVFoundation
 import UIKit
 
 final class CameraHandler: NSObject {
-    let session = SessionCaptureHolder()
     private let videoOutput = AVCaptureVideoDataOutput()
     private let photoOutput = AVCapturePhotoOutput()
     private var deviceInput: AVCaptureDeviceInput?
     private var cameraPosition: AVCaptureDevice.Position = .back
     private var addToCameraStream: ((UIImage, AVCaptureDevice.Position) -> Void)?
+    private var frameCaptureCompletion: ((UIImage, AVCaptureDevice.Position) -> Void)?
 
+    let session = SessionCaptureHandler()
     lazy var cameraStream: AsyncStream<(image: UIImage, position: AVCaptureDevice.Position)> = AsyncStream { continuation in
         addToCameraStream = { image, position in
             continuation.yield((image: image, position: position))
         }
     }
-
-    private var frameCaptureCompletion: ((UIImage, AVCaptureDevice.Position) -> Void)?
 
     func configure() async throws {
         Task.detached { [weak self] in
@@ -54,7 +53,7 @@ final class CameraHandler: NSObject {
         await session.stop()
     }
 
-    func createInput(for position: AVCaptureDevice.Position) async {
+    private func createInput(for position: AVCaptureDevice.Position) async {
         await session.beginConfiguration()
         if let deviceInput {
             await session.removeInput(deviceInput)
@@ -110,7 +109,7 @@ final class CameraHandler: NSObject {
         }
     }
 
-    var rotationAngle: CGFloat {
+    private var rotationAngle: CGFloat {
         let orientation = UIDevice.current.orientation
         switch orientation {
         case UIDeviceOrientation.portraitUpsideDown:

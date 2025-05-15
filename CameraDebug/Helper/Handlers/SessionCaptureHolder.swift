@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-actor SessionCaptureHolder {
+actor SessionCaptureHandler {
     let session = AVCaptureSession()
 
     init() {
