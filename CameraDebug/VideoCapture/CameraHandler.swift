@@ -25,21 +25,25 @@ final class CameraHandler: NSObject {
     private var frameCaptureCompletion: ((UIImage, AVCaptureDevice.Position) -> Void)?
 
     func configure() async throws {
-        guard try await checkAuthorization() else { return }
-        await createInput(for: cameraPosition)
+        Task.detached { [weak self] in
+            guard let self else { return }
 
-        photoOutput.maxPhotoQualityPrioritization = .quality
-        videoOutput.setSampleBufferDelegate(
-            self,
-            queue: .global(qos: .userInitiated)
-        )
+            guard try await self.checkAuthorization() else { return }
+            await self.createInput(for: cameraPosition)
 
-        for output in [photoOutput, videoOutput] {
-            await session.addOutput(output)
+            self.photoOutput.maxPhotoQualityPrioritization = .quality
+            self.videoOutput.setSampleBufferDelegate(
+                self,
+                queue: .global(qos: .userInitiated)
+            )
+
+            for output in [self.photoOutput, self.videoOutput] {
+                await self.session.addOutput(output)
+            }
+
+            await self.session.commitConfiguration()
+            await self.start()
         }
-
-        await session.commitConfiguration()
-        await start()
     }
 
     func start() async {
@@ -70,8 +74,12 @@ final class CameraHandler: NSObject {
     func flipCamera() async {
         let newPosition: AVCaptureDevice.Position = cameraPosition == .back ? .front : .back
         cameraPosition = newPosition
-        await createInput(for: newPosition)
-        await session.commitConfiguration()
+        Task.detached { [weak self] in
+            guard let self else { return }
+
+            await self.createInput(for: newPosition)
+            await self.session.commitConfiguration()
+        }
     }
 
     func capturePhoto() {
