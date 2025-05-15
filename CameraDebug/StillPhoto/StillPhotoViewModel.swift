@@ -11,7 +11,7 @@ import AVFoundation
 
 final class StillPhotoViewModel: ObservableObject {
     @Published var isRecording: Bool = false
-    @Published var image: UIImage?
+    @Published var sample: PhotoSample?
     @Published var displayError: Bool = false
     let cameraHandler = CameraHandler()
     var contextError: ContextError? {
@@ -27,9 +27,13 @@ final class StillPhotoViewModel: ObservableObject {
     }
 
     func handleCameraStream() async {
-        for await imageData in cameraHandler.cameraStream {
+        for await (image, position) in cameraHandler.cameraStream {
             Task { @MainActor in
-                image = imageData
+                sample = .init(
+                    type: .stillPhoto,
+                    position: position,
+                    image: image
+                )
             }
         }
     }

@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct StillPhotoView: View {
-    @StateObject var viewModel = StillPhotoViewModel()
+    @ObservedObject var viewModel: StillPhotoViewModel
     
     var body: some View {
         GeometryReader { geometry in
             VStack {
                 CameraView(
-                    image: $viewModel.image,
+                    sample: $viewModel.sample,
                     isRecording: $viewModel.isRecording,
                     session: viewModel.cameraHandler.session
                 )
@@ -30,12 +30,9 @@ struct StillPhotoView: View {
                     height: geometry.size.height * 0.8
                 )
                 HStack(alignment: .center) {
-                    NavigationLink {
-                        VideoCaptureView()
-                            .environmentObject(viewModel)
-                    } label: {
+                    NavigationLink(value: viewModel.sample) {
                         Text("Continue")
-                    }.disabled(viewModel.image == nil)
+                    }.disabled(viewModel.sample == nil)
                 }
                 .padding(.top)
             }.task {
@@ -73,5 +70,5 @@ struct StillPhotoView: View {
 }
 
 #Preview {
-    StillPhotoView()
+    StillPhotoView(viewModel: StillPhotoViewModel())
 }

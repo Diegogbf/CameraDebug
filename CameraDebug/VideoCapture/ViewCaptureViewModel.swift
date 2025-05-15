@@ -10,7 +10,7 @@ import SwiftUI
 
 final class VideoCaptureViewModel: ObservableObject {
     @Published var isRecording: Bool = false
-    @Published var image: UIImage?
+    @Published var sample: PhotoSample?
     @Published var displayError: Bool = false
     var contextError: ContextError? {
         didSet {
@@ -38,9 +38,13 @@ final class VideoCaptureViewModel: ObservableObject {
     func captureFrame() {
         Task {
             do {
-                let image = try await cameraHandler.captureFrame()
+                let (image, position) = try await cameraHandler.captureFrame()
                 await MainActor.run {
-                    self.image = image
+                    self.sample = .init(
+                        type: .videoFrame,
+                        position: position,
+                        image: image
+                    )
                 }
             } catch { }
         }

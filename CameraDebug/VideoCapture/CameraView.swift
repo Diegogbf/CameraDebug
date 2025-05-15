@@ -9,7 +9,7 @@ import AVFoundation
 import SwiftUI
 
 struct CameraView: View {
-    @Binding var image: UIImage?
+    @Binding var sample: PhotoSample?
     @Binding var isRecording: Bool
     let session: SessionCaptureHolder
     let mainButtonAction: () -> Void
@@ -24,7 +24,7 @@ struct CameraView: View {
         .overlay(alignment: .bottom) {
             HStack(spacing: 40) {
                 Spacer()
-                ThumbnailView(image: image)
+                ThumbnailView(image: sample?.image)
                 TakePictureButton(
                     isRecording: isRecording,
                     action: mainButtonAction

@@ -9,13 +9,13 @@ import SwiftUI
 import AVFoundation
 
 struct VideoCaptureView: View {
-    @StateObject var viewModel = VideoCaptureViewModel()
+    @ObservedObject var viewModel: VideoCaptureViewModel
 
     var body: some View {
         GeometryReader { geometry in
             VStack {
                 CameraView(
-                    image: $viewModel.image,
+                    sample: $viewModel.sample,
                     isRecording: $viewModel.isRecording,
                     session: viewModel.cameraHandler.session
                 ) {
@@ -34,13 +34,10 @@ struct VideoCaptureView: View {
                         viewModel.captureFrame()
                     }
                     .buttonStyle(CustomButton())
-                    .disabled(viewModel.image == nil && !viewModel.isRecording)
-                    NavigationLink {
-                        ResultsView()
-                            .environmentObject(viewModel)
-                    } label: {
+                    .disabled(viewModel.sample == nil && !viewModel.isRecording)
+                    NavigationLink(value: viewModel.sample) {
                         Text("Continue")
-                    }.disabled(viewModel.image == nil)
+                    }.disabled(viewModel.sample == nil)
                 }
                 .padding(.top)
             }.task {
@@ -80,5 +77,5 @@ struct VideoCaptureView: View {
 }
 
 #Preview {
-    VideoCaptureView()
+    VideoCaptureView(viewModel: VideoCaptureViewModel())
 }

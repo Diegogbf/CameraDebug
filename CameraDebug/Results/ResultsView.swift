@@ -10,18 +10,14 @@ import SwiftUI
 struct ResultsView: View {
     @State private var currentZoom = 0.0
     @State private var lastPosition = 1.0
-    @ObservedObject var viewModel: VideoCaptureViewModel
+    var stillPhotoSample: PhotoSample?
+    var videoFrameSample: PhotoSample?
     
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 24) {
-                if let image = viewModel.image {
-                    ResultImageView(image: image)
-                }
-                
-                if let image = viewModel.image {
-                    ResultImageView(image: image)
-                }
+                createSampleView(stillPhotoSample)
+                createSampleView(videoFrameSample)
             }
             .scaleEffect(currentZoom + lastPosition)
             .gesture(
@@ -43,6 +39,18 @@ struct ResultsView: View {
             )
         }
     }
+
+    private func createSampleView(_ sample: PhotoSample?) -> some View {
+        VStack(spacing: 24) {
+            if let sample {
+                ResultImageView(image: sample.image)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("\(sample.type.rawValue)")
+                    Text("Camera position: \(sample.postionDescription)")
+                }
+            }
+        }
+    }
 }
 
 struct ResultImageView: View {
@@ -57,7 +65,5 @@ struct ResultImageView: View {
 }
 
 #Preview {
-    ResultsView(
-        viewModel: VideoCaptureViewModel()
-    )
+    ResultsView()
 }

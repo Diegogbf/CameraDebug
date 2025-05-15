@@ -14,15 +14,15 @@ final class CameraHandler: NSObject {
     private let photoOutput = AVCapturePhotoOutput()
     private var deviceInput: AVCaptureDeviceInput?
     private var cameraPosition: AVCaptureDevice.Position = .back
-    private var addToCameraStream: ((UIImage) -> Void)?
+    private var addToCameraStream: ((UIImage, AVCaptureDevice.Position) -> Void)?
 
-    lazy var cameraStream: AsyncStream<UIImage> = AsyncStream { continuation in
-        addToCameraStream = { image in
-            continuation.yield(image)
+    lazy var cameraStream: AsyncStream<(image: UIImage, position: AVCaptureDevice.Position)> = AsyncStream { continuation in
+        addToCameraStream = { image, position in
+            continuation.yield((image: image, position: position))
         }
     }
 
-    private var frameCaptureCompletion: ((UIImage) -> Void)?
+    private var frameCaptureCompletion: ((UIImage, AVCaptureDevice.Position) -> Void)?
 
     func configure() async throws {
         guard try await checkAuthorization() else { return }
@@ -93,11 +93,11 @@ final class CameraHandler: NSObject {
         }
     }
 
-    func captureFrame() async throws -> UIImage {
+    func captureFrame() async throws -> (image: UIImage, position: AVCaptureDevice.Position) {
         return await withCheckedContinuation { continuation in
-            frameCaptureCompletion = { [weak self] image in
+            frameCaptureCompletion = { [weak self] image, position in
                 self?.frameCaptureCompletion = nil
-                continuation.resume(returning: image)
+                continuation.resume(returning: (image: image, position: position))
             }
         }
     }
@@ -147,7 +147,7 @@ extension CameraHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
         let context = CIContext()
         
         if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
-            frameCaptureCompletion?(UIImage(cgImage: cgImage))
+            frameCaptureCompletion?(UIImage(cgImage: cgImage), cameraPosition)
         }
     }
 }
@@ -160,6 +160,6 @@ extension CameraHandler: AVCapturePhotoCaptureDelegate {
     ) {
         guard let data = photo.fileDataRepresentation(),
               let image = UIImage(data: data) else { return }
-        addToCameraStream?(image)
+        addToCameraStream?(image, cameraPosition)
     }
 }
